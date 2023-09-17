@@ -1,0 +1,11 @@
+1
+Shivam Kumar  and Suryanshu Kumar
+
+1.I have Randomly created a permutation of size l, a particular no times take initial state as best of 
+this state that have least cost
+2.Then taking this as initial state i have use similar algorithm like Greedy Hill Climbing with some modifications 
+after several implementation of different logic to optimize 
+3.finally i have used a vector that all possible swap possible between locations of zones and we are randomly generating index for swapping.
+4.if cost is going to optimized, i am changing to that state
+5.when all the possible swap got exhausted then we are restarting same as described above generating new inital_state
+6.And i am keeping track best mapping after every random restarting
