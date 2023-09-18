@@ -1,0 +1,6 @@
+Metadata-Version: 2.1
+Name: board
+Version: 0.1
+Summary: Barebones pybind11+setup.py example project
+Author: Aniruddha Deb
+Author-email: aniruddha.deb.2002@gmail.com
