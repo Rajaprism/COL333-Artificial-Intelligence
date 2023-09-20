@@ -7,35 +7,42 @@ using namespace std;;
 #include "board.hpp"
 #include "engine.hpp"
 
+#define kingval 10000
+#define rookval 250
+#define bishopval 100
+#define pawnval 50
+
 int evalpawn(Board *b,bool t){
     // t-1 for white else 0;
     int val=0;
     if(!t){
+        val=20;
         if(b->data.b_pawn_bs!=DEAD){
             U8 pos=b->data.b_pawn_bs;
             int x=getx(pos),y=gety(pos);
-            val+=abs(2-x)+max(abs(1-y),abs(0-y));
-            if(x==4 && y==6)val+=2;
+            val-=abs(2-x)+min(abs(1-y),abs(0-y));
+            if(x==4 && y==6)val-=2;
         }
         if(b->data.b_pawn_ws!=DEAD){
             U8 pos=b->data.b_pawn_ws;
             int x=getx(pos),y=gety(pos);
-            val+=abs(2-x)+max(abs(1-y),abs(0-y));
-            if(x==4 && y==5)val+=2;
+            val-=abs(2-x)+min(abs(1-y),abs(0-y));
+            if(x==4 && y==5)val-=2;
         }
 
     }else{
+        val=20;
         if(b->data.w_pawn_bs!=DEAD){
             U8 pos=b->data.w_pawn_bs;
             int x=getx(pos),y=gety(pos);
-            val+=abs(4-x)+max(abs(5-y),abs(6-y));
-            if(x==2 && y==0)val+=2;
+            val-=abs(4-x)+min(abs(5-y),abs(6-y));
+            if(x==2 && y==0)val-=2;
         }
         if(b->data.w_pawn_ws!=DEAD){
             U8 pos=b->data.w_pawn_ws;
             int x=getx(pos),y=gety(pos);
-            val+=abs(4-x)+max(abs(5-y),abs(6-y));
-            if(x==2 && y==1)val+=2;
+            val-=abs(4-x)+min(abs(5-y),abs(6-y));
+            if(x==2 && y==1)val-=2;
         }
     }
     return val;
@@ -44,16 +51,20 @@ int evalpawn(Board *b,bool t){
 int evaluate(Board* b,bool t){
     int val=0;
     if(t){
-        if(b->data.w_king!=DEAD)val+=10000;
-        if(b->data.w_rook_bs!=DEAD)val+=250;
-        if(b->data.w_rook_ws!=DEAD)val+=250;
-        if(b->data.w_bishop!=DEAD)val+=100;
+        if(b->data.w_king!=DEAD)val+=kingval;
+        if(b->data.w_rook_bs!=DEAD)val+=rookval;
+        if(b->data.w_rook_ws!=DEAD)val+=rookval;
+        if(b->data.w_bishop!=DEAD)val+=bishopval;
+        if(b->data.w_pawn_bs!=DEAD)val+=pawnval;
+        if(b->data.w_pawn_ws!=DEAD)val+=pawnval;
         val+=evalpawn(b,t);
     }else{
-        if(b->data.b_king!=DEAD)val+=10000;
-        if(b->data.b_rook_bs!=DEAD)val+=250;
-        if(b->data.b_rook_ws!=DEAD)val+=250;
-        if(b->data.b_bishop!=DEAD)val+=100;
+        if(b->data.b_king!=DEAD)val+=kingval;
+        if(b->data.b_rook_bs!=DEAD)val+=rookval;
+        if(b->data.b_rook_ws!=DEAD)val+=rookval;
+        if(b->data.b_bishop!=DEAD)val+=bishopval;
+        if(b->data.b_pawn_bs!=DEAD)val+=pawnval;
+        if(b->data.b_pawn_ws!=DEAD)val+=pawnval;
         val+=evalpawn(b,t);
     }
     return val;
@@ -275,12 +286,12 @@ void Engine::find_best_move(const Board& b) {
             
         }
        
-        minimax(c,3,true,INT_MIN,INT_MAX,bestmove,st,st_real,true,deep);
-        
+        minimax(c,3,true,INT_MIN,INT_MAX,bestmove,st,st_real,true,deep);    
+
         c->do_move(bestmove);
         st_real.insert(c);
         delete c;
-        
+
         this->best_move = bestmove;
     }
 }
