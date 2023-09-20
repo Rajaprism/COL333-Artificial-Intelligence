@@ -6,6 +6,77 @@ using namespace std;;
 
 #include "board.hpp"
 #include "engine.hpp"
+
+int evalpawn(Board *b,bool t){
+    // t-1 for white else 0;
+    int val=0;
+    if(!t){
+        if(b->data.b_pawn_bs!=DEAD){
+            U8 pos=b->data.b_pawn_bs;
+            int x=getx(pos),y=gety(pos);
+            val+=abs(2-x)+max(abs(1-y),abs(0-y));
+            if(x==4 && y==6)val+=2;
+        }
+        if(b->data.b_pawn_ws!=DEAD){
+            U8 pos=b->data.b_pawn_ws;
+            int x=getx(pos),y=gety(pos);
+            val+=abs(2-x)+max(abs(1-y),abs(0-y));
+            if(x==4 && y==5)val+=2;
+        }
+
+    }else{
+        if(b->data.w_pawn_bs!=DEAD){
+            U8 pos=b->data.w_pawn_bs;
+            int x=getx(pos),y=gety(pos);
+            val+=abs(4-x)+max(abs(5-y),abs(6-y));
+            if(x==2 && y==0)val+=2;
+        }
+        if(b->data.w_pawn_ws!=DEAD){
+            U8 pos=b->data.w_pawn_ws;
+            int x=getx(pos),y=gety(pos);
+            val+=abs(4-x)+max(abs(5-y),abs(6-y));
+            if(x==2 && y==1)val+=2;
+        }
+    }
+    return val;
+}
+
+int evaluate(Board* b,bool t){
+    int val=0;
+    if(t){
+        if(b->data.w_king!=DEAD)val+=10000;
+        if(b->data.w_rook_bs!=DEAD)val+=250;
+        if(b->data.w_rook_ws!=DEAD)val+=250;
+        if(b->data.w_bishop!=DEAD)val+=100;
+        val+=evalpawn(b,t);
+    }else{
+        if(b->data.b_king!=DEAD)val+=10000;
+        if(b->data.b_rook_bs!=DEAD)val+=250;
+        if(b->data.b_rook_ws!=DEAD)val+=250;
+        if(b->data.b_bishop!=DEAD)val+=100;
+        val+=evalpawn(b,t);
+    }
+    return val;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 int abtak=INT_MIN;
 
 bool only_king(Board *b){
@@ -48,14 +119,14 @@ int evaluation(Board* b){
 
     int val=0;
 
-    if (b->in_check()) {
-        val -=1000; // Increase the value for checks by the white player.
-    }
-    b->_flip_player();
-    if (b->in_check()) {
-        val +=1000; // Increase the value for checks by the white player.
-    }
-    b->_flip_player();
+    // if (b->in_check()) {
+    //     val -=1000; // Increase the value for checks by the white player.
+    // }
+    // b->_flip_player();
+    // if (b->in_check()) {
+    //     val +=1000; // Increase the value for checks by the white player.
+    // }
+    // b->_flip_player();
     
     if(b->data.w_rook_ws  != DEAD)val+=5;
     if(b->data.w_rook_bs  != DEAD)val+=5;
@@ -166,23 +237,23 @@ void Engine::find_best_move(const Board& b) {
     }
 
     else {
-        std::vector<U16> moves;
-        std::cout << all_boards_to_str(b) << std::endl;
-        for (auto m : moveset) {
-            std::cout << move_to_str(m) << " ";
-        }
-        std::cout << std::endl;
-        std::sample(
-            moveset.begin(),
-            moveset.end(),
-            std::back_inserter(moves),
-            1,
-            std::mt19937{std::random_device{}()}
-        );
+        // std::vector<U16> moves;
+        // std::cout << all_boards_to_str(b) << std::endl;
+        // for (auto m : moveset) {
+        //     std::cout << move_to_str(m) << " ";
+        // }
+        // std::cout << std::endl;
+        // std::sample(
+        //     moveset.begin(),
+        //     moveset.end(),
+        //     std::back_inserter(moves),
+        //     1,
+        //     std::mt19937{std::random_device{}()}
+        // );
 
         
 
-        U16 bestmove=moves[0];
+        U16 bestmove;
         int best_val=INT_MAX;
         set<Board*> st;
         set<Board*> st_real;
