@@ -3,6 +3,7 @@
         "*.s": "bat",
         "*.css": "css",
         "*.yacc": "yacc",
-        "algorithm": "cpp"
+        "algorithm": "cpp",
+        "chrono": "cpp"
     }
 }
