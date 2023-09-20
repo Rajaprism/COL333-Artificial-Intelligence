@@ -70,7 +70,9 @@ int evaluate(Board* b,bool t){
     return val;
 }
 
-int Maxval(Board* b,int alpha,int beta,)
+int Maxval(Board* b,int alpha,int beta){
+    
+}
 
 
 
