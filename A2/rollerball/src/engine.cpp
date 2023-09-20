@@ -1,3 +1,167 @@
+// #include <algorithm>
+// #include<queue>
+// #include <random>
+// #include <iostream>
+// #include <set>
+// using namespace std;;
+
+// #include "board.hpp"
+// // #include "board.cpp"
+// #include "engine.hpp"
+
+
+// int MaxVal(Board*b,int alpha,int beta,int depth);
+// int MinVal(Board*b,int alpha,int beta,int depth);
+
+// #define kingval 10000
+// #define rookval 250
+// #define bishopval 100
+// #define pawnval 50
+// #define depthlevel 1
+// #define promote 2
+
+
+// int manhatten(U8 pos,int a,int b){
+//     int x=getx(pos),y=gety(pos);
+//     return abs(x-a)+abs(y-b);
+// }
+
+// int evalpawn(Board *b,bool t){
+//     // t-1 for white else 0;
+//     int val=0;
+//     if(!t){
+//         val=20;
+//         if(b->data.b_pawn_bs!=DEAD){
+//             U8 pos=b->data.b_pawn_bs;
+//             int x=getx(pos),y=gety(pos);
+//             val-=min(manhatten(pos,2,1),manhatten(pos,2,0));
+//             if(x==4 && y==6)val-=2;
+//         }
+//         if(b->data.b_pawn_ws!=DEAD){
+//             U8 pos=b->data.b_pawn_ws;
+//             int x=getx(pos),y=gety(pos);
+//             val-=min(manhatten(pos,2,1),manhatten(pos,2,0));
+//             if(x==4 && y==5)val-=2;
+//         }
+
+//     }else{
+//         val=20;
+//         if(b->data.w_pawn_bs!=DEAD){
+//             U8 pos=b->data.w_pawn_bs;
+//             int x=getx(pos),y=gety(pos);
+//             val-=min(manhatten(pos,4,5),manhatten(pos,4,6));
+//             if(x==2 && y==0)val-=2;
+//         }
+//         if(b->data.w_pawn_ws!=DEAD){
+//             U8 pos=b->data.w_pawn_ws;
+//             int x=getx(pos),y=gety(pos);
+//             val-=min(manhatten(pos,4,5),manhatten(pos,4,6));
+//             if(x==2 && y==1)val-=2;
+//         }
+//     }
+//     return val;
+// }
+
+// int evaluate(Board* b,bool t){
+//     int val=0;
+//     if(t){
+//         if(b->data.w_king!=DEAD)val+=kingval;
+//         if(b->data.w_rook_bs!=DEAD)val+=rookval;
+//         if(b->data.w_rook_ws!=DEAD)val+=rookval;
+//         if(b->data.w_bishop!=DEAD)val+=bishopval;
+//         if(b->data.w_pawn_bs!=DEAD)val+=pawnval;
+//         if(b->data.w_pawn_ws!=DEAD)val+=pawnval;
+//         val+=promote*evalpawn(b,t);
+//     }else{
+//         if(b->data.b_king!=DEAD)val+=kingval;
+//         if(b->data.b_rook_bs!=DEAD)val+=rookval;
+//         if(b->data.b_rook_ws!=DEAD)val+=rookval;
+//         if(b->data.b_bishop!=DEAD)val+=bishopval;
+//         if(b->data.b_pawn_bs!=DEAD)val+=pawnval;
+//         if(b->data.b_pawn_ws!=DEAD)val+=pawnval;
+//         val+=promote*evalpawn(b,t);
+//     }
+//     return val;
+// }
+
+// int MinVal(Board* b,int alpha,int beta,int depth){
+
+//     auto moveset=b->get_legal_moves();
+//     if(depth==0 || moveset.size()==0){
+//         if(b->data.player_to_play==WHITE)
+//         return evaluate(b,true)-evaluate(b,false);
+//         else
+//         return evaluate(b,false)-evaluate(b,true);
+//     }
+//     int val=INT_MAX;
+//     for(auto move: moveset){
+//         auto copyb=b->copy();
+//         copyb->do_move(move);
+//         val=min(val,MaxVal(copyb,alpha,beta,depth-1));
+//         beta=min(beta,val);
+//         delete copyb;
+//         if(alpha>=beta)return val;
+//     }
+//     return val;
+// }
+
+// int MaxVal(Board* b,int alpha,int beta,int depth){
+//     auto moveset=b->get_legal_moves();
+//     if(depth==0 || moveset.size()==0){
+//         if(b->data.player_to_play==WHITE)
+//         return evaluate(b,true)-evaluate(b,false);
+//         else 
+//         return evaluate(b,false)-evaluate(b,true);
+//     }
+//     int val=INT_MIN;
+//     for(auto move : moveset){
+//         auto copyb=b->copy();
+//         copyb->do_move(move);
+//         val=max(val,MinVal(copyb,alpha,beta,depth-1));
+//         alpha=max(alpha,val);
+//         delete copyb;
+//         if(alpha>=beta) return val;
+//     }
+//     return val;
+// }
+
+// void Engine::find_best_move(const Board& b) {
+
+//     auto startTime = std::chrono::high_resolution_clock::now();
+//     auto moveset = b.get_legal_moves();
+//     if (moveset.size() == 0) {
+//         this->best_move = 0;
+//         return;
+//     }
+
+//     else {
+//         priority_queue<pair<int,U16>> bestmove;
+//         U16 best_move=*moveset.begin();
+//         for(auto move : moveset){
+//             Board* c = b.copy();
+//             c->do_move(move);
+//             int val=MinVal(c,INT_MIN,INT_MAX,depthlevel);
+//             bestmove.push({val,move});
+//             delete c;
+//         }
+//         Board * c=b.copy();
+//         best_move=bestmove.top().second;
+//         c->do_move(best_move);
+//         delete c;
+
+//         auto endTime = std::chrono::high_resolution_clock::now();
+//         std::chrono::duration<double> elapsedTime = endTime - startTime;
+//         // Convert elapsed time to seconds
+//         double seconds = elapsedTime.count();
+//         cout<<"time to calculate"<<seconds;
+
+//         this->best_move=best_move;
+        
+//     }
+// }
+
+
+
 #include <algorithm>
 #include <random>
 #include <iostream>
@@ -6,97 +170,13 @@ using namespace std;;
 
 #include "board.hpp"
 #include "engine.hpp"
-
-#define kingval 10000
-#define rookval 250
-#define bishopval 100
-#define pawnval 50
-
-int evalpawn(Board *b,bool t){
-    // t-1 for white else 0;
-    int val=0;
-    if(!t){
-        val=20;
-        if(b->data.b_pawn_bs!=DEAD){
-            U8 pos=b->data.b_pawn_bs;
-            int x=getx(pos),y=gety(pos);
-            val-=abs(2-x)+min(abs(1-y),abs(0-y));
-            if(x==4 && y==6)val-=2;
-        }
-        if(b->data.b_pawn_ws!=DEAD){
-            U8 pos=b->data.b_pawn_ws;
-            int x=getx(pos),y=gety(pos);
-            val-=abs(2-x)+min(abs(1-y),abs(0-y));
-            if(x==4 && y==5)val-=2;
-        }
-
-    }else{
-        val=20;
-        if(b->data.w_pawn_bs!=DEAD){
-            U8 pos=b->data.w_pawn_bs;
-            int x=getx(pos),y=gety(pos);
-            val-=abs(4-x)+min(abs(5-y),abs(6-y));
-            if(x==2 && y==0)val-=2;
-        }
-        if(b->data.w_pawn_ws!=DEAD){
-            U8 pos=b->data.w_pawn_ws;
-            int x=getx(pos),y=gety(pos);
-            val-=abs(4-x)+min(abs(5-y),abs(6-y));
-            if(x==2 && y==1)val-=2;
-        }
-    }
-    return val;
-}
-
-int evaluate(Board* b,bool t){
-    int val=0;
-    if(t){
-        if(b->data.w_king!=DEAD)val+=kingval;
-        if(b->data.w_rook_bs!=DEAD)val+=rookval;
-        if(b->data.w_rook_ws!=DEAD)val+=rookval;
-        if(b->data.w_bishop!=DEAD)val+=bishopval;
-        if(b->data.w_pawn_bs!=DEAD)val+=pawnval;
-        if(b->data.w_pawn_ws!=DEAD)val+=pawnval;
-        val+=evalpawn(b,t);
-    }else{
-        if(b->data.b_king!=DEAD)val+=kingval;
-        if(b->data.b_rook_bs!=DEAD)val+=rookval;
-        if(b->data.b_rook_ws!=DEAD)val+=rookval;
-        if(b->data.b_bishop!=DEAD)val+=bishopval;
-        if(b->data.b_pawn_bs!=DEAD)val+=pawnval;
-        if(b->data.b_pawn_ws!=DEAD)val+=pawnval;
-        val+=evalpawn(b,t);
-    }
-    return val;
-}
-
-int Maxval(Board* b,int alpha,int beta){
-    
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 int abtak=INT_MIN;
 
 bool only_king(Board *b){
 
     int ct=0;
 
-    if(b->data.b_rook_ws  != DEAD)ct++;
+    if(b->data.b_rook_ws  != DEAD)ct++;;
     if(b->data.b_rook_bs  != DEAD)ct++;
     if(b->data.b_bishop   != DEAD)ct++;
     if(b->data.b_pawn_ws  != DEAD)ct++;
@@ -132,14 +212,20 @@ int evaluation(Board* b){
 
     int val=0;
 
-    // if (b->in_check()) {
-    //     val -=1000; // Increase the value for checks by the white player.
-    // }
-    // b->_flip_player();
-    // if (b->in_check()) {
-    //     val +=1000; // Increase the value for checks by the white player.
-    // }
-    // b->_flip_player();
+    if (b->in_check()) {
+        val -=1000; // Increase the value for checks by the white player.
+    }
+    if (is_checkmate(b)) {
+        val -=5000; // Increase the value for checks by the white player.
+    }
+    b->_flip_player();
+    if (b->in_check()) {
+        val +=1000; // Increase the value for checks by the white player.
+    }
+    if (is_checkmate(b)) {
+        val +=5000; // Increase the value for checks by the white player.
+    }
+    b->_flip_player();
     
     if(b->data.w_rook_ws  != DEAD)val+=5;
     if(b->data.w_rook_bs  != DEAD)val+=5;
@@ -153,9 +239,11 @@ int evaluation(Board* b){
     if(b->data.b_pawn_ws  != DEAD)val-=2;
     if(b->data.b_pawn_bs  != DEAD)val-=2;
 
-    return val;
-}
 
+
+    return val;
+
+}
 
 int minimax(Board* b, int depth, int alpha, int beta, bool maximizingPlayer, U16& bestMove, set<Board*>& st, set<Board*>& st_real,bool ok,int deep) {
 
@@ -179,6 +267,7 @@ int minimax(Board* b, int depth, int alpha, int beta, bool maximizingPlayer, U16
     if (moveset.size() == 0) {
         return evaluation(b);
     }
+
 
     if (maximizingPlayer) {
         int maxEval = INT_MIN;
@@ -210,7 +299,8 @@ int minimax(Board* b, int depth, int alpha, int beta, bool maximizingPlayer, U16
 
         st.erase(b);
         return maxEval;
-    } else {
+    } 
+    else {
         int minEval = INT_MAX;
 
         for (auto move : moveset) {
@@ -250,23 +340,23 @@ void Engine::find_best_move(const Board& b) {
     }
 
     else {
-        // std::vector<U16> moves;
-        // std::cout << all_boards_to_str(b) << std::endl;
-        // for (auto m : moveset) {
-        //     std::cout << move_to_str(m) << " ";
-        // }
-        // std::cout << std::endl;
-        // std::sample(
-        //     moveset.begin(),
-        //     moveset.end(),
-        //     std::back_inserter(moves),
-        //     1,
-        //     std::mt19937{std::random_device{}()}
-        // );
+        std::vector<U16> moves;
+        std::cout << all_boards_to_str(b) << std::endl;
+        for (auto m : moveset) {
+            std::cout << move_to_str(m) << " ";
+        }
+        std::cout << std::endl;
+        std::sample(
+            moveset.begin(),
+            moveset.end(),
+            std::back_inserter(moves),
+            1,
+            std::mt19937{std::random_device{}()}
+        );
 
         
 
-        U16 bestmove;
+        U16 bestmove=moves[0];
         int best_val=INT_MAX;
         set<Board*> st;
         set<Board*> st_real;
@@ -288,12 +378,12 @@ void Engine::find_best_move(const Board& b) {
             
         }
        
-        minimax(c,3,true,INT_MIN,INT_MAX,bestmove,st,st_real,true,deep);    
-
+        minimax(c,3,true,INT_MIN,INT_MAX,bestmove,st,st_real,true,deep);
+        
         c->do_move(bestmove);
         st_real.insert(c);
         delete c;
-
+        
         this->best_move = bestmove;
     }
 }

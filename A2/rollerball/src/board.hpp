@@ -77,8 +77,8 @@ struct Board {
     Board* copy() const;
     void do_move(U16 move);
 
-    private:
     void _flip_player();
+    private:
     std::unordered_set<U16> _get_pseudolegal_moves() const;
     std::unordered_set<U16> _get_pseudolegal_moves_for_piece(U8 piece_pos) const;
     void _do_move(U16 move);
