@@ -4,6 +4,7 @@
         "*.css": "css",
         "*.yacc": "yacc",
         "algorithm": "cpp",
-        "chrono": "cpp"
+        "chrono": "cpp",
+        "unordered_set": "cpp"
     }
 }
