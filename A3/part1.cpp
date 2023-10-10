@@ -56,6 +56,14 @@ void solve(){
         Gdegree[b]++;
     }
 
+    // degree constraint for completeness
+    for(int i=1;i<=N;i++){
+        if(Gdegree[i]<k1-1)totalclauses.push_back({-g1i(i)});
+    }
+    for(int i=1;i<=N;i++){
+        if(Gdegree[i]<k2-1)totalclauses.push_back({-g2i(i)});
+    }
+
 
     //  ith nodes can't be in both graph g1 and g2, N no of clauses
     for(int i=1;i<=N;i++){
@@ -112,13 +120,7 @@ void solve(){
 
 
 
-    // degree constraint for completeness
-    for(int i=1;i<=N;i++){
-        if(Gdegree[i]<k1-1)totalclauses.push_back({-g1i(i)});
-    }
-    for(int i=1;i<=N;i++){
-        if(Gdegree[i]<k2-1)totalclauses.push_back({-g2i(i)});
-    }
+
 
     MakeInput();
 }
