@@ -4,6 +4,7 @@
 #include <iostream>
 #include <set>
 #include <chrono>
+
 using namespace std;;
 
 #include "board.hpp"
@@ -21,7 +22,7 @@ int MinVal(Board*b,int alpha,int beta,int depth,int deeplevel,Engine*e);
 #define pawnval 60
 #define checkval 100
 #define checkmate 100000
-#define depthlevel 6
+#define depthlevel 4
 #define promote 3
 #define dist 20
 
