@@ -33,5 +33,11 @@
     "**/.vscode",
     "**/.vscode/**"
   ],
-  "C_Cpp_Runner.useAddressSanitizer": false
+  "C_Cpp_Runner.useAddressSanitizer": false,
+  "files.associations": {
+    "*.s": "bat",
+    "*.css": "css",
+    "*.yacc": "yacc",
+    "iosfwd": "cpp"
+  }
 }

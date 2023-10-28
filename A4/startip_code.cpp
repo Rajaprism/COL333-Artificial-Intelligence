@@ -1,195 +1,98 @@
-#include <iostream>
-#include <string>
-#include <vector>
-#include <list>
-#include <fstream>
-#include <sstream>
-#include <cstdlib>
+#include<bits/stdc++.h>
+#include "debuggers.hpp"
 
-
+#define en cout<<"\n";
 // Format checker just assumes you have Alarm.bif and Solved_Alarm.bif (your file) in current directory
 using namespace std;
 
-// Our graph consists of a list of nodes where each node is represented as follows:
-class Graph_Node{
+// // Our graph consists of a list of nodes where each node is represented as follows:
 
-private:
-	string Node_Name;      // Variable name 
-	vector<int> Children; // Children of a particular node - these are index of nodes in graph.
-	vector<string> Parents; // Parents of a particular node- note these are names of parents
-	int nvalues;  // Number of categories a variable represented by this node can take
-	vector<string> values; // Categories of possible values
-	vector<float> CPT; // conditional probability table as a 1-d array . Look for BIF format to understand its meaning
 
-public:
-	// Constructor- a node is initialised with its name and its categories
-    Graph_Node(string name,int n,vector<string> vals)
-	{
-		Node_Name=name;
+class BayesNet{
+
+	vector<int> Questions;
+	vector<vector<int>> DataPoints;
+	vector<float> weights;
 	
-		nvalues=n;
-		values=vals;
-		
+	vector<vector<int>> Child; //
+	vector<vector<int>> Parent; //
+
+	vector<vector<float>> Cond_Pro_Table; //
+
+	map<string,int> Map_name_index; //
+	vector<string> Parameter;  //
+	vector<vector<string>> Parameter_values; //
+	int Index=0;
+
+	string name,line,temp;
+
+	public:
+	BayesNet(string bayesfile,string datafile){
+		Parameter_values.resize(37);
+		Parent.resize(37);
+		Child.resize(37);
+		Cond_Pro_Table.resize(37);
+
+		ReadBayes(bayesfile);
+		DataReader(datafile);
+
+		for(int i=0;i<Cond_Pro_Table.size();i++){
+
+			int sz=Parameter_values[i].size();
+
+			for(int j=0;j<Cond_Pro_Table[i].size();j++){
+				if(Cond_Pro_Table[i][j]!=-1)continue;
+				Cond_Pro_Table[i][j]=1.0/sz;
+			}
+		}
+
+		Aastha();
+
+		for(int i=0;i<Cond_Pro_Table.size();i++){
+			for(float j: Cond_Pro_Table[i])cout<<j<<" ";
+			en;
+		}
 
 	}
-	string get_name()
-	{
-		return Node_Name;
-	}
-	vector<int> get_children()
-	{
-		return Children;
-	}
-	vector<string> get_Parents()
-	{
-		return Parents;
-	}
-	vector<float> get_CPT()
-	{
-		return CPT;
-	}
-	int get_nvalues()
-	{
-		return nvalues;
-	}
-	vector<string> get_values()
-	{
-		return values;
-	}
-	void set_CPT(vector<float> new_CPT)
-	{
-		CPT.clear();
-		CPT=new_CPT;
-	}
-    void set_Parents(vector<string> Parent_Nodes)
-    {
-        Parents.clear();
-        Parents=Parent_Nodes;
-    }
-    // add another node in a graph as a child of this node
-    int add_child(int new_child_index )
-    {
-        for(int i=0;i<Children.size();i++)
-        {
-            if(Children[i]==new_child_index)
-                return 0;
-        }
-        Children.push_back(new_child_index);
-        return 1;
-    }
 
+	void ReadBayes(string filename){
 
+		ifstream myfile(filename);
+		int CurrId;
 
-};
-
-
- // The whole network represted as a list of nodes
-class network{
-
-	list <Graph_Node> Pres_Graph;
-
-public:
-	int addNode(Graph_Node node)
-	{
-		Pres_Graph.push_back(node);
-		return 0;
-	}
-    
-    
-	int netSize()
-	{
-		return Pres_Graph.size();
-	}
-    // get the index of node with a given name
-    int get_index(string val_name)
-    {
-        list<Graph_Node>::iterator listIt;
-        int count=0;
-        for(listIt=Pres_Graph.begin();listIt!=Pres_Graph.end();listIt++)
-        {
-            if(listIt->get_name().compare(val_name)==0)
-                return count;
-            count++;
-        }
-        return -1;
-    }
-// get the node at nth index
-    list<Graph_Node>::iterator get_nth_node(int n)
-    {
-       list<Graph_Node>::iterator listIt;
-        int count=0;
-        for(listIt=Pres_Graph.begin();listIt!=Pres_Graph.end();listIt++)
-        {
-            if(count==n)
-                return listIt;
-            count++;
-        }
-        return listIt; 
-    }
-    //get the iterator of a node with a given name
-    list<Graph_Node>::iterator search_node(string val_name)
-    {
-        list<Graph_Node>::iterator listIt;
-        for(listIt=Pres_Graph.begin();listIt!=Pres_Graph.end();listIt++)
-        {
-            if(listIt->get_name().compare(val_name)==0)
-                return listIt;
-        }
-    
-            cout<<"node not found\n";
-        return listIt;
-    }
-	
-
-};
-
-network read_network()
-{
-	network Alarm;
-	string line;
-	int find=0;
-  	ifstream myfile("alarm.bif"); 
-  	string temp;
-  	string name;
-  	vector<string> values;
-  	
-    if (myfile.is_open())
-    {
-    	while (! myfile.eof() )
+		while (! myfile.eof())
     	{
     		stringstream ss;
       		getline (myfile,line);
       		
-      		
       		ss.str(line);
      		ss>>temp;
-     		
      		
      		if(temp.compare("variable")==0)
      		{
                     
      				ss>>name;
+
+					string nv;
+					ss>>nv;ss>>nv;
+					Map_name_index[name]=Index;
+					CurrId=Index;
+					Index++;
+
+					Parameter.push_back(name);
+
      				getline (myfile,line);
                    
      				stringstream ss2;
      				ss2.str(line);
-     				for(int i=0;i<4;i++)
-     				{
-     					
-     					ss2>>temp;
-     					
-     					
-     				}
-     				values.clear();
+
+     				for(int i=0;i<4;i++)ss2>>temp;
+
      				while(temp.compare("};")!=0)
      				{
-     					values.push_back(temp);
-     					
+     					Parameter_values[CurrId].push_back(temp);
      					ss2>>temp;
     				}
-     				Graph_Node new_node(name,values.size(),values);
-     				int pos=Alarm.addNode(new_node);
-
      				
      		}
      		else if(temp.compare("probability")==0)
@@ -197,23 +100,20 @@ network read_network()
 
      				ss>>temp; 
      				ss>>temp;
+
+					CurrId=Map_name_index[temp];
      				
-                    list<Graph_Node>::iterator listIt;
-                    list<Graph_Node>::iterator listIt1;
-     				listIt=Alarm.search_node(temp);
-                    int index=Alarm.get_index(temp);
                     ss>>temp;
-                    values.clear();
+					int index;
      				while(temp.compare(")")!=0)
      				{
-                        listIt1=Alarm.search_node(temp);
-                        listIt1->add_child(index);
-     					values.push_back(temp);
-     					
+                        index=Map_name_index[temp];
+						Child[index].push_back(CurrId);
+						Parent[CurrId].push_back(index);
+
      					ss>>temp;
 
     				}
-                    listIt->set_Parents(values);
     				getline (myfile,line);
      				stringstream ss2;
                     
@@ -222,48 +122,155 @@ network read_network()
                     
      				ss2>> temp;
                     
-     				vector<float> curr_CPT;
-                    string::size_type sz;
      				while(temp.compare(";")!=0)
      				{
-                        
-     					curr_CPT.push_back(atof(temp.c_str()));
-     					
+                        Cond_Pro_Table[CurrId].push_back(atof(temp.c_str()));
      					ss2>>temp;
-                       
-                        
-
     				}
-                    
-                    listIt->set_CPT(curr_CPT);
-
 
      		}
-            else
-            {
-                
-            }
-     		
-     		
 
-    		
-    		
     	}
-    	
-    	if(find==1)
-    	myfile.close();
-  	}
-  	
-  	return Alarm;
-}
+	}
+
+	void DataReader(string data_filename){
+
+		ifstream inputFile(data_filename);
+		string currline;
+		string token;
+
+
+		while(!inputFile.eof()){
+
+			getline(inputFile,currline);
+			istringstream iss(currline);
+			vector<int> Sample(37);
+			int i=0;
+			iss>>temp;
+			int qindex=-1;
+
+			while(i<37){
+
+				if(temp=="\"?\""){
+
+					Sample[i]=-1;
+					qindex=i;
+				}
+				else{
+					int index=0;
+					for(auto pval : Parameter_values[i])
+					if(pval!=temp)index++;
+					else{
+						Sample[i]=index;
+						break;
+					}
+				}
+				i++;
+				iss >> temp;
+			}
+
+			if(qindex !=-1){
+				float wt=(1.0)/Parameter_values[i].size();
+				for(int k=0;k<Parameter_values[qindex].size();k++){
+					Sample[qindex]=k;
+					
+					DataPoints.push_back(Sample);
+					weights.push_back(wt);
+					Questions.push_back(qindex);
+				}
+			}else{
+				DataPoints.push_back(Sample);
+				weights.push_back(1.0);
+				Questions.push_back(-1);
+			}
+
+		}
+	}
+
+	void Aastha(){
+		int k=0;
+		while(k<100){
+			Expectation();
+			update_cpt();
+			k++;
+		}
+		
+	}
+
+	void update_cpt(){
+		for(int var=0;var<Cond_Pro_Table.size();var++){
+
+			int pval_sz=Parameter_values[var].size();
+			int p_sz=Cond_Pro_Table[var].size()/pval_sz;
+
+			vector<float> p_sum(p_sz,1.0);
+			vector<float> pc(p_sz*pval_sz,0.0);
+
+			for(int j=0;j<Questions.size();j++){
+				int indx=0;
+				int sz=1;
+
+				for(int k=Parent[var].size()-1;k>=0;k--){
+
+					int p=Parent[var][k];
+					indx+=DataPoints[j][p]*sz;
+					sz*=Parameter_values[p].size();
+
+				}
+
+				p_sum[indx]+=weights[j];
+
+				indx+=DataPoints[j][var]*sz;
+
+				pc[indx]+=weights[j];
+
+			}
+
+			for(int j=0;j<Cond_Pro_Table[var].size();j++){
+
+				Cond_Pro_Table[var][j]=pc[j]/p_sum[j%p_sz];
+
+			}
+		}
+	}
+
+	float calcProb(vector<int> &sample,int var,int val){
+		int indx=0;
+		int sz=1;
+		for(int i=Parent[var].size()-1;i>=0;i--){
+			int p=Parent[var][i];
+			indx+=sample[p]*sz;
+			sz*=Parameter_values[p].size();
+		}
+		indx+=val*sz;
+		return Cond_Pro_Table[var][indx];
+	}
+
+	void Expectation(){
+		for(int i=0;i<Questions.size();i++){
+			if(Questions[i]==-1)continue;
+
+			int index=Questions[i];
+			int pvalues=Parameter_values[index].size();
+			float s=0.0;
+			vector<int> ss=DataPoints[i];
+			float cp=calcProb(ss,index,DataPoints[i][index]);
+			for(int cvar : Child[index] ){
+				cp*=calcProb(ss,cvar,DataPoints[i][cvar]);
+			}
+			weights[i]=cp;
+		}
+	}
+
+};
+
 
 
 int main()
 {
-	network Alarm;
-	Alarm=read_network();
-    
-// Example: to do something
+	BayesNet*it=new BayesNet("alarm.bif","records.txt");
+	// free(it);
+	// Example: to do something
 	cout<<"Perfect! Hurrah! \n";
 	
 }
