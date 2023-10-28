@@ -385,8 +385,6 @@ int main()
     }
    cout <<"Score is "<<score;
 
-	//cout<<Alarm.netSize();
-	
 }
 
 

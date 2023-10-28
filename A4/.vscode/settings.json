@@ -38,6 +38,7 @@
     "*.s": "bat",
     "*.css": "css",
     "*.yacc": "yacc",
-    "iosfwd": "cpp"
+    "iosfwd": "cpp",
+    "ostream": "cpp"
   }
 }

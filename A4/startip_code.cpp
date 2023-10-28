@@ -1,12 +1,11 @@
 #include<bits/stdc++.h>
-#include "debuggers.hpp"
 
 #define en cout<<"\n";
 // Format checker just assumes you have Alarm.bif and Solved_Alarm.bif (your file) in current directory
 using namespace std;
 
 // // Our graph consists of a list of nodes where each node is represented as follows:
-
+auto start = std::chrono::high_resolution_clock::now();
 
 class BayesNet{
 
@@ -25,9 +24,10 @@ class BayesNet{
 	int Index=0;
 
 	string name,line,temp;
+	int ct=0;
 
 	public:
-	BayesNet(string bayesfile,string datafile){
+	BayesNet(string bayesfile,string datafile,float t){
 		Parameter_values.resize(37);
 		Parent.resize(37);
 		Child.resize(37);
@@ -46,12 +46,8 @@ class BayesNet{
 			}
 		}
 
-		Aastha();
-
-		for(int i=0;i<Cond_Pro_Table.size();i++){
-			for(float j: Cond_Pro_Table[i])cout<<j<<" ";
-			en;
-		}
+		Aastha(t);
+		WriteTofile("solved_alarm.bif",bayesfile);
 
 	}
 
@@ -179,6 +175,7 @@ class BayesNet{
 					Questions.push_back(qindex);
 				}
 			}else{
+				ct++;
 				DataPoints.push_back(Sample);
 				weights.push_back(1.0);
 				Questions.push_back(-1);
@@ -187,12 +184,15 @@ class BayesNet{
 		}
 	}
 
-	void Aastha(){
+	void Aastha(float t){
 		int k=0;
-		while(k<100){
+		
+		while(true){
+			auto end = std::chrono::high_resolution_clock::now();
+			auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+			if((duration.count())/1e6+0.001>=t)break;
 			Expectation();
 			update_cpt();
-			k++;
 		}
 		
 	}
@@ -203,7 +203,7 @@ class BayesNet{
 			int pval_sz=Parameter_values[var].size();
 			int p_sz=Cond_Pro_Table[var].size()/pval_sz;
 
-			vector<float> p_sum(p_sz,1.0);
+			vector<float> p_sum(p_sz,0.001);
 			vector<float> pc(p_sz*pval_sz,0.0);
 
 			for(int j=0;j<Questions.size();j++){
@@ -228,7 +228,7 @@ class BayesNet{
 
 			for(int j=0;j<Cond_Pro_Table[var].size();j++){
 
-				Cond_Pro_Table[var][j]=pc[j]/p_sum[j%p_sz];
+				Cond_Pro_Table[var][j]=max(pc[j]/p_sum[j%p_sz],(float)0.01);
 
 			}
 		}
@@ -255,23 +255,53 @@ class BayesNet{
 			float s=0.0;
 			vector<int> ss=DataPoints[i];
 			float cp=calcProb(ss,index,DataPoints[i][index]);
-			for(int cvar : Child[index] ){
-				cp*=calcProb(ss,cvar,DataPoints[i][cvar]);
-			}
+
+			// for(int cvar : Child[index] ){
+			// 	cp*=calcProb(ss,cvar,DataPoints[i][cvar]);
+			// }
 			weights[i]=cp;
+		}
+	}
+	
+	void WriteTofile(string filename,string file){
+		ofstream outfile(filename);
+		ifstream inpfile(file);
+		getline(inpfile,line);
+		while(line[0]!='p'){
+			outfile<<line<<endl;
+			getline(inpfile,line);
+		}
+		int currID=0;
+		while(!inpfile.eof() && currID<37){
+			outfile<<line<<endl;
+			getline(inpfile,line);
+			string s="	table ";
+
+			for(float cp : Cond_Pro_Table[currID] ){
+				std::stringstream ss;
+				ss << std::fixed << std::setprecision(4) << cp;
+				s+=ss.str();
+				s+=" ";
+			}
+			s+=";";
+
+			outfile<<s<<endl;
+			getline(inpfile,line);
+			outfile<<line<<endl;
+			currID++;
+			getline(inpfile,line);
+
 		}
 	}
 
 };
 
-
-
 int main()
 {
-	BayesNet*it=new BayesNet("alarm.bif","records.txt");
-	// free(it);
+	BayesNet*it=new BayesNet("alarm.bif","records.txt",60);
+	free(it);
 	// Example: to do something
-	cout<<"Perfect! Hurrah! \n";
+	cout<<"Perfect! Hurrah!\n";
 	
 }
 
