@@ -48,7 +48,7 @@ class BayesNet{
 		}
 		ct=0;
 
-		Aastha(t);
+		Inferencing(t);
 		WriteTofile("solved_alarm.bif",bayesfile);
 		cout<<" no of iterations: "<<ct<<endl;
 	}
@@ -186,14 +186,21 @@ class BayesNet{
 		}
 	}
 
-	void Aastha(float t){
-		
+	void Inferencing(float t){
+		auto interval=0.0;
 		while(true){
 			auto end = std::chrono::high_resolution_clock::now();
 			auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
-			if((duration.count())/1e6+0.001>=t)break;
+			if(((duration.count())/1e6)+0.002+interval>=t)break;
+			auto st=std::chrono::high_resolution_clock::now();
 			Expectation();
 			update_cpt();
+			auto et=std::chrono::high_resolution_clock::now();
+			if(ct==0){
+				auto  it= std::chrono::duration_cast<std::chrono::microseconds>(et - st);
+				interval=(it.count())/1e6;
+
+			}
 			ct++;
 		}
 		
@@ -205,7 +212,7 @@ class BayesNet{
 			int pval_sz=Parameter_values[var].size();
 			int p_sz=Cond_Pro_Table[var].size()/pval_sz;
 
-			vector<float> p_sum(p_sz,0.003);
+			vector<float> p_sum(p_sz,0.0035);
 			vector<float> pc(p_sz*pval_sz,0.0);
 
 			for(int j=0;j<Questions.size();j++){
@@ -297,9 +304,9 @@ class BayesNet{
 	
 };
 
-int main()
+int main(int argc, char* argv[])
 {
-	BayesNet*it=new BayesNet("alarm.bif","records.txt",1);
+	BayesNet*it=new BayesNet(argv[1],argv[2],120);
 	free(it);
 
 	// Example: to do something

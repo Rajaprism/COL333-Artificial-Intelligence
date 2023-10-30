@@ -1,0 +1,1 @@
+g++ -std=c++11 startip_code.cpp -o my_program
