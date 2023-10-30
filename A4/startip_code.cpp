@@ -35,7 +35,7 @@ class BayesNet{
 		Cond_Pro_Table.resize(37);
 
 		ReadBayes(bayesfile);
-		// Testcase_generator("Aastha.txt",1e5);
+
 		DataReader(datafile);
 
 		for(int i=0;i<Cond_Pro_Table.size();i++){
@@ -43,8 +43,7 @@ class BayesNet{
 			int sz=Parameter_values[i].size();
 
 			for(int j=0;j<Cond_Pro_Table[i].size();j++){
-				if(Cond_Pro_Table[i][j]!=-1)continue;
-				Cond_Pro_Table[i][j]=1.0;
+				Cond_Pro_Table[i][j]=1.0/sz;
 			}
 		}
 		ct=0;
@@ -206,7 +205,7 @@ class BayesNet{
 			int pval_sz=Parameter_values[var].size();
 			int p_sz=Cond_Pro_Table[var].size()/pval_sz;
 
-			vector<float> p_sum(p_sz,0.014);
+			vector<float> p_sum(p_sz,0.003);
 			vector<float> pc(p_sz*pval_sz,0.0);
 
 			for(int j=0;j<Questions.size();j++){
@@ -256,12 +255,12 @@ class BayesNet{
 			int index=Questions[i];
 			int pvalues=Parameter_values[index].size();
 			vector<int> ss=DataPoints[i];
-			float cp=calcProb(ss,index,DataPoints[i][index])+0.05;
+			float cp=calcProb(ss,index,DataPoints[i][index]);
 
 			for(int cvar : Child[index] ){
-				cp*=calcProb(ss,cvar,DataPoints[i][cvar])+0.055;
+				cp*=calcProb(ss,cvar,DataPoints[i][cvar]);
 			}
-			weights[i]=cp+0.001;
+			weights[i]=cp;
 		}
 	}
 	
@@ -296,45 +295,11 @@ class BayesNet{
 		}
 	}
 	
-	class RandomGenerator {
-	public:
-		RandomGenerator() {
-			seed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
-			mt = std::mt19937(seed);
-		}
-
-		int random_num(int r) {
-			return mt() % r;
-		}
-
-	private:
-		unsigned seed;
-		std::mt19937 mt;
-	};
-	
-	void Testcase_generator(string filename,int n){
-		ofstream testcase(filename);
-		RandomGenerator rg;
-		for(int i=0;i<n;i++){
-			int k=rg.random_num(37);
-			string s="";
-			for(int j=0;j<37;j++){
-				if(j==k){
-					s+="\"?\" ";
-					continue;
-				}
-				int p=Parameter_values[j].size();
-				s+=Parameter_values[j][rg.random_num(p)];
-				s+=" ";
-			}
-			testcase<<s<<endl;
-		}
-	}
 };
 
 int main()
 {
-	BayesNet*it=new BayesNet("alarm.bif","Aastha.txt",60);
+	BayesNet*it=new BayesNet("alarm.bif","records.txt",1);
 	free(it);
 
 	// Example: to do something
