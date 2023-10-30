@@ -35,7 +35,7 @@ class BayesNet{
 		Cond_Pro_Table.resize(37);
 
 		ReadBayes(bayesfile);
-		// Testcase_generator("Aastha.txt",1e4);
+		// Testcase_generator("Aastha.txt",1e5);
 		DataReader(datafile);
 
 		for(int i=0;i<Cond_Pro_Table.size();i++){
@@ -47,10 +47,11 @@ class BayesNet{
 				Cond_Pro_Table[i][j]=1.0;
 			}
 		}
+		ct=0;
 
 		Aastha(t);
 		WriteTofile("solved_alarm.bif",bayesfile);
-
+		cout<<" no of iterations: "<<ct<<endl;
 	}
 
 	void ReadBayes(string filename){
@@ -187,7 +188,6 @@ class BayesNet{
 	}
 
 	void Aastha(float t){
-		int k=0;
 		
 		while(true){
 			auto end = std::chrono::high_resolution_clock::now();
@@ -195,6 +195,7 @@ class BayesNet{
 			if((duration.count())/1e6+0.001>=t)break;
 			Expectation();
 			update_cpt();
+			ct++;
 		}
 		
 	}
@@ -205,7 +206,7 @@ class BayesNet{
 			int pval_sz=Parameter_values[var].size();
 			int p_sz=Cond_Pro_Table[var].size()/pval_sz;
 
-			vector<float> p_sum(p_sz,0.001);
+			vector<float> p_sum(p_sz,0.014);
 			vector<float> pc(p_sz*pval_sz,0.0);
 
 			for(int j=0;j<Questions.size();j++){
@@ -254,14 +255,13 @@ class BayesNet{
 
 			int index=Questions[i];
 			int pvalues=Parameter_values[index].size();
-			float s=0.0;
 			vector<int> ss=DataPoints[i];
-			float cp=calcProb(ss,index,DataPoints[i][index]);
+			float cp=calcProb(ss,index,DataPoints[i][index])+0.05;
 
 			for(int cvar : Child[index] ){
-				cp*=calcProb(ss,cvar,DataPoints[i][cvar]);
+				cp*=calcProb(ss,cvar,DataPoints[i][cvar])+0.055;
 			}
-			weights[i]=cp;
+			weights[i]=cp+0.001;
 		}
 	}
 	
@@ -320,7 +320,7 @@ class BayesNet{
 			string s="";
 			for(int j=0;j<37;j++){
 				if(j==k){
-					s+="? ";
+					s+="\"?\" ";
 					continue;
 				}
 				int p=Parameter_values[j].size();
@@ -336,11 +336,11 @@ int main()
 {
 	BayesNet*it=new BayesNet("alarm.bif","Aastha.txt",60);
 	free(it);
+
 	// Example: to do something
 	cout<<"Perfect! Hurrah!\n";
 	
 }
-
 
 
 
