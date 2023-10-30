@@ -212,7 +212,7 @@ class BayesNet{
 			int pval_sz=Parameter_values[var].size();
 			int p_sz=Cond_Pro_Table[var].size()/pval_sz;
 
-			vector<float> p_sum(p_sz,0.0035);
+			vector<float> p_sum(p_sz,0.001);
 			vector<float> pc(p_sz*pval_sz,0.0);
 
 			for(int j=0;j<Questions.size();j++){
