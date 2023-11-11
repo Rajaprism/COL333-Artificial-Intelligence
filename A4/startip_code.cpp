@@ -212,8 +212,8 @@ class BayesNet{
 			int pval_sz=Parameter_values[var].size();
 			int p_sz=Cond_Pro_Table[var].size()/pval_sz;
 
-			vector<float> p_sum(p_sz,0.001);
-			vector<float> pc(p_sz*pval_sz,0.0);
+			vector<float> p_sum(p_sz,0.0035);
+			vector<float> pc(p_sz*pval_sz,0.00);
 
 			for(int j=0;j<Questions.size();j++){
 				int indx=0;
@@ -306,9 +306,8 @@ class BayesNet{
 
 int main(int argc, char* argv[])
 {
-	BayesNet*it=new BayesNet(argv[1],argv[2],120);
+	BayesNet*it=new BayesNet(argv[1],argv[2],3);
 	free(it);
-
 	// Example: to do something
 	cout<<"Perfect! Hurrah!\n";
 	

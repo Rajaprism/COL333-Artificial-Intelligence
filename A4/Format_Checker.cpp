@@ -10,6 +10,17 @@
 
 using namespace std;
 
+bool isFloat(const std::string &input) {
+    try {
+        size_t pos = 0;
+        std::stof(input, &pos);
+        return pos == input.size();
+    } catch (...) {
+        return false;
+    }
+}
+
+
 class Graph_Node{
 
 private:
@@ -178,7 +189,7 @@ void check_format()
             if(testline.compare(line)!=0)
             {
                 cout<<"Error Here in line number"<<line_count<<"\n";
-                exit(0);
+                exit(1);
             }
             line_count++;
             stringstream ss;
@@ -203,7 +214,7 @@ void check_format()
                     if(test_temp.compare(temp)!=0)
                     {
                         cout<<"Error Here in line number"<<line_count<<"\n";
-                        exit(0);
+                        exit(1);
                     }
      				ss2>> temp;
                     testss2>>test_temp;
@@ -212,10 +223,10 @@ void check_format()
      				while(temp.compare(";")!=0)
      				{
 
-                        if(!atof(test_temp.c_str()))
+                        if(!isFloat(test_temp.c_str()))
                         {
                             cout<<" Probem in Probab values in line "<<line_count<<"\n";
-                            exit(0);
+                            exit(1);
      					}
                         //cout<<"here"<<temp<<"\n";
      					ss2>>temp;
@@ -227,7 +238,7 @@ void check_format()
                     if(test_temp.compare(";")!=0)
                     {
                         cout<<" Probem in Semi-colon in line "<<line_count<<"\n";
-                        exit(0);
+                        exit(1);
                     }
                     line_count++;
 
@@ -242,7 +253,7 @@ void check_format()
         if(!testfile.eof())
         {
             cout<<" Test File contains more lines\n";
-                        exit(0);
+                        exit(1);
         }   
     	//cout<<line;
     	//if(find==1)
@@ -372,7 +383,7 @@ int main()
 	network Alarm1,Alarm2;
 	check_format();
     Alarm1=read_network((char*)"solved_alarm.bif");
-    Alarm2=read_network((char*)"gold_alarm.bif");
+    Alarm2=read_network((char*)"g1.bif");
     float score=0;
     for(int i=0;i<Alarm1.netSize();i++)
     {
@@ -384,9 +395,10 @@ int main()
             score+=fabs(cpt1[j]-cpt2[j]);
     }
    cout <<"Score is "<<score;
-
+   // cout <<"SUCCESS"; 
+	//cout<<Alarm.netSize();
+   return 0;
 }
-
 
 
 
