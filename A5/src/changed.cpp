@@ -48,7 +48,18 @@ U8 lastmove=0;
 
 
 void fixdepth(Board * b){
-    return;
+    if(b->data.board_type==EIGHT_TWO)return;
+    int p=0;
+    for(int i=0;i<64;i++){
+        if(b->data.board_0[i] & playertoplay)p++;
+    }
+    cout<<" pieces "<<p<<endl;
+    if(p<=5){
+        depthlevel=6;
+        b_factor_73_84=10;
+    }
+    depthlevel=4;
+    b_factor_73_84=INT_MAX;
 }
 
 
@@ -338,12 +349,11 @@ int Quesent82(Board*b,int val){
 
 int MinVal( Board* b, int alpha, int beta, int depth, int deeplevel, Engine*e){
     nodes++;
-
     if(depth==deeplevel){
 
         int val=utility_val(b)              ;
-
-        return val                          ;
+        int extra=Quesent(b,val)            ;
+        return val+extra                    ;
 
     }
 
@@ -354,12 +364,29 @@ int MinVal( Board* b, int alpha, int beta, int depth, int deeplevel, Engine*e){
         return INT_MIN                      ;
     }
 
-    int val=INT_MAX                         ;
+    vector< pair< int, Board* > > Move_Order;
 
     for( auto move : moveset ) {
         Board *copyb=new Board(*b)          ;
 
         copyb-> do_move_(move)              ;
+        int ut=utility_val(copyb)           ;
+        Move_Order.push_back({ ut, copyb }) ;
+    }
+
+    sort(Move_Order.begin(), Move_Order.end(), [&](const pair<int, Board*> &p, const pair<int, Board*> &q){
+
+        if( p.first < q.first ) return true ;
+        return false                        ;
+
+    })                                      ;
+
+    int val=INT_MAX                         ;
+    int child=0;
+
+    for(auto [move,copyb] : Move_Order){
+
+        if(depth>=b_depth && child>b_factor_73_84)break;
 
         val  = min( val, MaxVal( copyb, alpha, beta, depth+1, deeplevel, e ) )  ;
         beta = min( beta, val )             ;
@@ -376,7 +403,8 @@ int MaxVal(Board* b,int alpha,int beta,int depth,int deeplevel,Engine*e){
     if(depth==deeplevel){
 
         int val=utility_val(b)              ;
-        return val                          ;
+        int extra=Quesent(b,val)            ;
+        return val+extra                    ;
 
     }
 
@@ -389,14 +417,30 @@ int MaxVal(Board* b,int alpha,int beta,int depth,int deeplevel,Engine*e){
         return INT_MAX                      ;
     }
 
-    int val=INT_MIN                         ;
-    
+    vector< pair< int, Board* > > Move_Order;
+
     for( auto move : moveset ) {
 
         Board *copyb=new Board(*b)          ;
 
         copyb-> do_move_(move)              ;
+        int ut=utility_val(copyb)           ;
+        Move_Order.push_back({ ut, copyb }) ;
 
+    }
+
+    sort(Move_Order.begin(),Move_Order.end(),[&](const pair<int,Board*> &p,const pair<int,Board*> &q){
+
+        if ( p.first > q.first ) return true;
+        return false                        ;
+
+    })                                      ;
+
+    int val=INT_MIN                         ;
+    int child=0;
+    for(auto [move,copyb] : Move_Order){
+
+        if(depth>=b_depth && child>b_factor_73_84)break;
         val=max(val, MinVal(copyb, alpha, beta, depth+1, deeplevel, e));
 
         alpha = max( alpha, val )           ;
@@ -412,8 +456,11 @@ int MinVal82( Board* b, int alpha, int beta, int depth, int deeplevel, Engine*e)
     if(depth==deeplevel){
 
         int val=utility_val(b)              ;
+        int extra=Quesent82(b,val)            ;
+        // if(playertoplay&(1<<6))cout<<"\n\n\n\n\n\n\n"<<"white"<<" : "<<depth<<" "<<"\n\n\n\n\n\n";
+        // else cout<<"\n\n\n\n\n\n\n"<<"black"<<" : "<<depth<<" "<<"\n\n\n\n\n\n";
 
-        return val                   ;
+        return val+extra                    ;
 
     }
 
@@ -424,15 +471,28 @@ int MinVal82( Board* b, int alpha, int beta, int depth, int deeplevel, Engine*e)
         return INT_MIN                      ;
     }
 
-
-    int val=INT_MAX                         ;
+    vector< pair< int, Board* > > Move_Order;
     
     for( auto move : moveset ) {
-
         Board *copyb=new Board(*b)          ;
 
         copyb-> do_move_(move)              ;
+        int ut=utility_val(copyb)           ;
+        Move_Order.push_back({ ut, copyb }) ;
+    }
 
+    sort(Move_Order.begin(), Move_Order.end(), [&](const pair<int, Board*> &p, const pair<int, Board*> &q){
+
+        if( p.first < q.first ) return true ;
+        return false                        ;
+
+    })                                      ;
+
+    int val=INT_MAX                         ;
+    int child=0;
+    for(auto [move,copyb] : Move_Order){
+
+        if(depth>=b_depth82 && child>b_factor82)break;
         val  = min( val, MaxVal82( copyb, alpha, beta, depth+1, deeplevel, e ) )  ;
         beta = min( beta, val )             ;
         delete copyb                        ;
@@ -448,8 +508,10 @@ int MaxVal82(Board* b,int alpha,int beta,int depth,int deeplevel,Engine*e){
     if(depth==deeplevel){
 
         int val=utility_val(b)              ;
+        int extra=Quesent82(b,val)          ;
 
-        return val                          ;
+        return val+extra                    ;
+
     }
 
     auto moveset=b->get_legal_moves()       ;
@@ -461,15 +523,30 @@ int MaxVal82(Board* b,int alpha,int beta,int depth,int deeplevel,Engine*e){
         return INT_MAX                      ;
     }
 
-
-    int val=INT_MIN                         ;
+    vector< pair< int, Board* > > Move_Order;
 
     for( auto move : moveset ) {
 
         Board *copyb=new Board(*b)          ;
 
         copyb-> do_move_(move)              ;
+        int ut=utility_val(copyb)           ;
+        Move_Order.push_back({ ut, copyb }) ;
 
+    }
+
+    sort(Move_Order.begin(),Move_Order.end(),[&](const pair<int,Board*> &p,const pair<int,Board*> &q){
+
+        if ( p.first > q.first ) return true;
+        return false                        ;
+
+    })                                      ;
+
+    int val=INT_MIN                         ;
+    int child=0;
+    for(auto [move,copyb] : Move_Order){
+
+        if(depth>=b_depth82 && child>b_factor82)break;
         val=max(val, MinVal82(copyb, alpha, beta, depth+1, deeplevel, e));
 
         alpha = max( alpha, val )           ;
@@ -488,12 +565,32 @@ U16 BestMove(Board* b,unordered_set<U16>& moveset,Engine* e){
 
     int alpha=INT_MIN                       ;  
 
-    // fixdepth(b)                             ;
+    vector< pair< int, pair<U16,Board*> > > Move_Order;
 
-    for(auto move : moveset){
+    for( auto move : moveset ) {
 
         Board *copyb=new Board(*b)          ;
-        copyb->do_move_(move)               ;
+
+        copyb-> do_move_(move)              ;
+        int ut=utility_val(copyb)           ;
+        Move_Order.push_back({ ut, {move,copyb} }) ;
+
+    }
+
+    sort(Move_Order.begin(),Move_Order.end(),[&](const pair< int, pair<U16,Board*> > &p,const pair< int, pair<U16,Board*> > &q){
+
+        if ( p.first > q.first ) return true;
+        return false                        ;
+
+    })                                      ;
+
+    fixdepth(b)                              ;
+
+    for(auto [ut,mu] : Move_Order){
+
+        // Board *copyb=new Board(*b)          ;
+        Board * copyb=mu.second;
+        U16 move=mu.first;
 
         int val;
         if(b->data.board_type==EIGHT_TWO) val=MinVal82(copyb,alpha,INT_MAX,1,depthlevel82,e);
@@ -516,18 +613,18 @@ void Engine::find_best_move(const Board& b) {
 
     if (moveset.size() == 0) {
 
-        this->best_move = 0                 ;
+        this->best_move = 0;
         return;
     }
     else {
 
-        Board* c=new Board(b)               ;
-        nodes=0                             ;
+        Board* c=new Board(b);
+        nodes=0;
         U16 best_move=BestMove(c,moveset,this);
 
-        this->best_move=best_move           ;
-        delete c                            ;
-        counter++                           ;
+        this->best_move=best_move;
+        delete c;
+        counter++;
 
     }
 }

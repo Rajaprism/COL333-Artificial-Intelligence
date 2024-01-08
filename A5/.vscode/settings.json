@@ -1,0 +1,9 @@
+{
+    "files.associations": {
+        "*.s": "bat",
+        "*.css": "css",
+        "*.yacc": "yacc",
+        "iostream": "cpp",
+        "thread": "cpp"
+    }
+}
