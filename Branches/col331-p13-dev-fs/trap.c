@@ -52,6 +52,7 @@ trap(struct trapframe *tf)
   default:
     cprintf("unexpected trap %d from cpu %d eip %x (cr2=0x%x)\n",
             tf->trapno, cpuid(), tf->eip, rcr2());
+    cprintf("\nMy name is Raja Kumar\n");
     panic("trap");
   }
 }

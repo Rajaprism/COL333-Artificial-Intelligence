@@ -19,7 +19,7 @@ OBJS = \
 	log.o\
 
 # Cross-compiling (e.g., on Mac OS X)
-# TOOLPREFIX = i386-jos-elf
+TOOLPREFIX = x86_64-elf-
 
 # Using native tools (e.g., on X86 Linux)
 #TOOLPREFIX = 
